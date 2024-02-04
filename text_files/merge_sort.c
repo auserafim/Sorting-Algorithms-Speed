@@ -19,10 +19,13 @@ void ler_arquivo(int *arr, int tam, const char *arq_ref) {
     fclose(file);
 }
 
-void arquivo_de_saida(int *arr, int tam, int trocas, double tempo_passado, const char *arq_ref) {
-    FILE *file = fopen(arq_ref, "w");
+void arquivo_de_saida(int *arr, int tam, int trocas, double tempo_passado, const char *arq_ref, const char *algorithm_name) {
+    char output_arq_ref[100];
+    snprintf(output_arq_ref, sizeof(output_arq_ref), "%s_%s_resultado_%d.txt", algorithm_name, arq_ref, tam);
+
+    FILE *file = fopen(output_arq_ref, "w");
     if (file == NULL) {
-        printf("Erro: %s\n", arq_ref);
+        printf("Erro: %s\n", output_arq_ref);
         exit(1);
     }
 
@@ -37,16 +40,55 @@ void arquivo_de_saida(int *arr, int tam, int trocas, double tempo_passado, const
     fclose(file);
 }
 
-void bubble_sort(int *arr, int tam, int *trocas) {
-    for (int i = 0; i < tam - 1; ++i) {
-        for (int j = 0; j < tam - i - 1; ++j) {
-            if (arr[j] > arr[j + 1]) {
-                int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-                (*trocas)++;
-            }
+void merge(int *arr, int esquerda, int meio, int direita, int *trocas) {
+    int i, j, k;
+    int n1 = meio - esquerda + 1;
+    int n2 = direita - meio;
+
+    int L[n1], R[n2];
+
+    for (i = 0; i < n1; i++)
+        L[i] = arr[esquerda + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[meio + 1 + j];
+
+    i = 0;
+    j = 0;
+    k = esquerda;
+
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+            (*trocas)++;
         }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void merge_sort(int *arr, int esquerda, int direita, int *trocas) {
+    if (esquerda < direita) {
+        int meio = esquerda + (direita - esquerda) / 2;
+
+        merge_sort(arr, esquerda, meio, trocas);
+        merge_sort(arr, meio + 1, direita, trocas);
+
+        merge(arr, esquerda, meio, direita, trocas);
     }
 }
 
@@ -77,15 +119,15 @@ int main() {
         ler_arquivo(arr, tam, arq_refs[file_index]);
 
         clock_t start_time = clock();
-        bubble_sort(arr, tam, &trocas);
+        merge_sort(arr, 0, tam - 1, &trocas);
         clock_t end_time = clock();
 
         double tempo_passado = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
 
         char output_arq_ref[100];
-        snprintf(output_arq_ref, sizeof(output_arq_ref), "bubble_sort_resultado_%d.txt", file_index + 1);
+        snprintf(output_arq_ref, sizeof(output_arq_ref), "merge_sort_resultado_%d.txt", file_index + 1);
 
-        arquivo_de_saida(arr, tam, trocas, tempo_passado, output_arq_ref);
+        arquivo_de_saida(arr, tam, trocas, tempo_passado, output_arq_ref, "merge_sort");
     }
 
     return 0;

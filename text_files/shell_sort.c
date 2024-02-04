@@ -19,10 +19,13 @@ void ler_arquivo(int *arr, int tam, const char *arq_ref) {
     fclose(file);
 }
 
-void arquivo_de_saida(int *arr, int tam, int trocas, double tempo_passado, const char *arq_ref) {
-    FILE *file = fopen(arq_ref, "w");
+void arquivo_de_saida(int *arr, int tam, int trocas, double tempo_passado, const char *arq_ref, const char *algorithm_name) {
+    char output_arq_ref[100];
+    snprintf(output_arq_ref, sizeof(output_arq_ref), "%s_%s_resultado_%d.txt", algorithm_name, arq_ref, tam);
+
+    FILE *file = fopen(output_arq_ref, "w");
     if (file == NULL) {
-        printf("Erro: %s\n", arq_ref);
+        printf("Erro: %s\n", output_arq_ref);
         exit(1);
     }
 
@@ -37,15 +40,16 @@ void arquivo_de_saida(int *arr, int tam, int trocas, double tempo_passado, const
     fclose(file);
 }
 
-void bubble_sort(int *arr, int tam, int *trocas) {
-    for (int i = 0; i < tam - 1; ++i) {
-        for (int j = 0; j < tam - i - 1; ++j) {
-            if (arr[j] > arr[j + 1]) {
-                int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
+void shell_sort(int *arr, int tam, int *trocas) {
+    for (int gap = tam / 2; gap > 0; gap /= 2) {
+        for (int i = gap; i < tam; ++i) {
+            int temp = arr[i];
+            int j;
+            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
+                arr[j] = arr[j - gap];
                 (*trocas)++;
             }
+            arr[j] = temp;
         }
     }
 }
@@ -77,15 +81,15 @@ int main() {
         ler_arquivo(arr, tam, arq_refs[file_index]);
 
         clock_t start_time = clock();
-        bubble_sort(arr, tam, &trocas);
+        shell_sort(arr, tam, &trocas);
         clock_t end_time = clock();
 
         double tempo_passado = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
 
         char output_arq_ref[100];
-        snprintf(output_arq_ref, sizeof(output_arq_ref), "bubble_sort_resultado_%d.txt", file_index + 1);
+        snprintf(output_arq_ref, sizeof(output_arq_ref), "shell_sort_resultado_%d.txt", file_index + 1);
 
-        arquivo_de_saida(arr, tam, trocas, tempo_passado, output_arq_ref);
+        arquivo_de_saida(arr, tam, trocas, tempo_passado, output_arq_ref, "shell_sort");
     }
 
     return 0;

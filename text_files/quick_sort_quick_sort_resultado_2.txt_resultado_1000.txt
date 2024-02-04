@@ -1,4 +1,4 @@
-Sorted Array:
+Vetor Ordenado:
 1459
 2946
 4068
@@ -1000,5 +1000,5 @@ Sorted Array:
 997435
 999406
 
-Number of trocas: 251529
-Elapsed time: 0.000915 seconds
+Número de trocas: 6542
+Tempo de execução: 0.000099 segundos
